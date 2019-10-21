@@ -1,13 +1,15 @@
+
 const Levels = {
     1: {
         bonusesPercent: 75,
-        enemiesPositions: [{x: 32 * 15, y: 32}, {x: 32, y: 32 * 11}, {x: 32 * 15, y: 32 * 11}],
+        enemies: [{pos: {x: 32 * 15, y: 32}, type: 'ghost'}, {pos: {x: 32, y: 32 * 11}, type: 'ghost'}, {pos: {x: 32 * 15, y: 32 * 11}, type: 'ghost'}],
         enemiesSpeed: .5
     },
     2: {
         bonusesPercent: 65,
-        enemiesPositions: [{x: 32 * 15, y: 32}, {x: 32, y: 32 * 11}, {x: 32 * 15, y: 32 * 11},
-            {x: 32 * 11, y: 32 * 3}, {x: 32 * 11, y: 32 * 9}],
+        enemies: [{pos: {x: 32 * 15, y: 32}, type: 'ghost'}, {pos: {x: 32, y: 32 * 11}, type: 'ghost'}, {pos: {x: 32 * 15, y: 32 * 11}, type: 'ghost'}
+        , {pos: {x: 32 * 11, y: 32 * 3}, type: 'dead'}, {pos: {x: 32 * 11, y: 32 * 9}, type: 'dead'}
+            ],
         enemiesSpeed: .5
     },
     3: {

@@ -1,24 +1,7 @@
-import { loadGhostSprite, loadDeadSprite } from './sprites.js';
 import { createSpriteLayer } from './layers.js';
 
-export default function createEnemy(pos, type, game){
-    if(type == 'dead'){
-        return loadDeadSprite().then(deadSprite => {
-            const dead = new Enemy(pos, type, deadSprite, game)
-            game.enemies.push(dead)
-            return dead
-        })
-    } else if(type == 'ghost'){
-        return loadGhostSprite().then(ghostSprite => {
-            const ghost = new Enemy(pos, type, ghostSprite, game)
-            game.enemies.push(ghost)
-            return ghost
-        })
-    }
-}
 
-
-class Enemy{
+export default class Enemy{
     constructor(pos, type, ghostSprite, game, spriteLayer){
         this.pos = pos
         this.direction = {x: 1, y: 0}
@@ -59,7 +42,6 @@ class Enemy{
     }
 
     getBallonFrameName(){
-        console.log('ballon')
         if(this.currentFrameCount < 75){
             this.currentFrameCount++;
             return `ballon-${this.frameIndex}`
@@ -154,7 +136,7 @@ class Enemy{
             this.lastDirection = {...this.direction}
             this.direction = {x: this.direction.x * -1, y: this.direction.y * -1}
             this.animationStartPosition = {...this.pos}
-        }  else if(this.changeAxis){
+        }  else if(this.changeAxis && this.type == 'dead'){
             this.getToPlayer()
         }
         this.pos.x = this.pos.x + this.direction.x * this.vel

@@ -56,7 +56,20 @@ class Player extends Entity {
     }
 
     kill(){
-        console.log('I got killed')
+        // console.log('I got killed')
+        this.lives -= 1;
+        if(this.lives > 0 ){
+            this.resurrect()
+        }
+    }
+
+    resurrect(){
+        // this.pos = {}
+        this.pos = {x: -100, y: -100}
+        setTimeout(() => {
+            this.pos = {x: 32, y: 32}
+        }, 750)
+        // this.pos = {x: 32, y: 32}
     }
 
     draw(context) {
