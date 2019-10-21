@@ -80,7 +80,7 @@ export default class Bomb extends Entity {
                 var last = false;
                 var position = { x: Math.round((this.pos.x  + j * dirX * 32) / 32) * 32, y: Math.round((this.pos.y + j * dirY * 32) / 32) * 32 };
                 var material = this.game.getTileMaterial(position);
-                if (material == 'wall') { // One can not simply burn the wall
+                if (material == 'wall') { 
                     explode = false;
                     last = true;
                 } else if (material == 'wood') {
@@ -112,6 +112,7 @@ export default class Bomb extends Entity {
                 this.game.layers.splice(i, 1);
             }
         }
+        this.game.player.bombs = this.game.player.bombs.filter( (bomb) => bomb != this )
         setTimeout(() => {
             const fireLength = this.fires.length
             for (let i = 0; i <  fireLength; i++) {

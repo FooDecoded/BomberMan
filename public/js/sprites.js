@@ -59,6 +59,26 @@ export function loadGhostSprite(){
     });
 }
 
+export function loadDeadSprite(){
+    return loadImage('/img/dead.png')
+    .then(image => {
+        const ghost = new SpriteSheet(image, 32, 32);
+        ghost.define('dead-left-1', 0, 32 * 3, 32, 32);
+        ghost.define('dead-left-2', 32, 32 * 3, 32, 32);
+        ghost.define('dead-left-3', 32 * 2, 32 * 3, 32, 32);
+        ghost.define('dead-right-1', 0, 32, 32, 32);
+        ghost.define('dead-right-2', 32, 32, 32, 32);
+        ghost.define('dead-right-3', 32 * 2, 32 , 32, 32);
+        ghost.define('dead-top-1', 0, 0, 32, 32);
+        ghost.define('dead-top-2', 32, 0, 32, 32);
+        ghost.define('dead-top-3', 32 * 2, 0, 32, 32);
+        ghost.define('dead-down-1', 0, 64, 32, 32);
+        ghost.define('dead-down-2', 32, 64 , 32, 32);
+        ghost.define('dead-down-3', 32 * 2, 64 , 32, 32);
+        return ghost;
+    });
+}
+
 export function loadFireSprite(){
     return loadImage('/img/fire.png')
     .then(image => {

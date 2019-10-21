@@ -4,14 +4,12 @@ import Bonus from './Bonus.js'
 
 
 function drawBonuses(context, sprites, woodsArray, game, ) {
-    // Sort tiles randomly
     let woods = [...woodsArray]
     woods.sort(function() {
         return 0.5 - Math.random();
     });
-    let bonusesPercent = 16;
+    let bonusesPercent = game.bonusesPercent;
     let bonusTypes = ['speed', 'bomb', 'fire']
-    // Distribute bonuses to quarters of map precisely fairly
     for (var j = 0; j < 4; j++) {
         var bonusesCount = Math.round(woods.length * bonusesPercent * 0.01 / 4);
         var placedCount = 0;
@@ -21,16 +19,15 @@ function drawBonuses(context, sprites, woodsArray, game, ) {
             }
 
             var tile = woods[i];
-            if ((j == 0 && tile.position.x < this.tilesX / 2 && tile.position.y < this.tilesY / 2)
-                || (j == 1 && tile.position.x < this.tilesX / 2 && tile.position.y > this.tilesY / 2)
-                || (j == 2 && tile.position.x > this.tilesX / 2 && tile.position.y < this.tilesX / 2)
-                || (j == 3 && tile.position.x > this.tilesX / 2 && tile.position.y > this.tilesX / 2)) {
+            if ((j == 0 && tile.pos.x < 32 / 2 && tile.pos.y < 32 / 2)
+                || (j == 1 && tile.pos.x < 32 / 2 && tile.pos.y > 32 / 2)
+                || (j == 2 && tile.pos.x > 32 / 2 && tile.pos.y < 32 / 2)
+                || (j == 3 && tile.pos.x > 32 / 2 && tile.pos.y > 32 / 2)) {
 
                 var typePosition = bonusTypes[placedCount % 3];
                 var bonus = new Bonus({...tile.pos}, typePosition, game);
                 game.bonuses.push(bonus);
                 
-                // Move wood to front
                 sprites.woodSprite.draw('wood', context, tile.pos.x , tile.pos.y)
                 placedCount++;
             }
@@ -41,45 +38,36 @@ function drawBonuses(context, sprites, woodsArray, game, ) {
 function drawBackground(context, sprites, tiles, game) {
     let bonusTypes = ['speed', 'bomb', 'fire']
     let woodArray = []
-    for (var i = 0; i < 13; i++) {
-        for (var j = 0; j < 17; j++) {
-            if ((i == 0 || j == 0 || i == 13 - 1 || j == 17 - 1)
-                || (j % 2 == 0 && i % 2 == 0)) {
-                // Wall tiles
-                // var tile = new Tile('wall', { x: j, y: i });
-                
-                // this.stage.addChild(tile.bmp);
-                
-                sprites.wallSprite.draw('wall', context, j * 32 , i * 32)
-                tiles.push(new Tile({x: j * 32, y: i * 32}, 'wall', game))
-                // this.tiles.push(tile);  gonna stay there
+    for (var y= 0; y< 13; y++) {
+        for (var x = 0;x < 17;x++) {
+            if ((y== 0 ||x == 0 || y== 13 - 1 ||x == 17 - 1)
+                || (x % 2 == 0 && y% 2 == 0)) {
+                sprites.wallSprite.draw('wall', context,x * 32 , y* 32)
+                tiles.push(new Tile({x:x * 32, y: y* 32}, 'wall', game))
             } else {
-                // Grass tiles
-                // var tile = new Tile('grass', { x: j, y: i });
-                // this.stage.addChild(tile.bmp);
-                sprites.grassSprite.draw('grass', context, j * 32, i * 32)
-                // tiles.push(new Tile({x: j * 32, y: i * 32}, 'grass', game))    
-                // Wood tiles
-                if (!(i <= 2 && j <= 2)
-                    && !(i >= 13 - 3 && j >= 17 - 3)
-                    && !(i <= 2 && j >= 17 - 3)
-                    && !(i >= 13 - 3 && j <= 2)) {
-    
-                    // var wood = new Tile('wood', { x: j, y: i });
-                    // this.stage.addChild(wood.bmp);
-                    // this.tiles.push(wood);
-                    // debugger
-                    var bonus = new Bonus({x: j * 32, y: i * 32}, bonusTypes[i % 3], game);
-                    game.bonuses.push(bonus);
-                    sprites.woodSprite.draw('wood', context, j * 32, i * 32)
-                    let woodTile = new Tile({x: j * 32, y: i * 32}, 'wood', game)
+                sprites.grassSprite.draw('grass', context,x * 32, y* 32)
+                if((x > 3 && x < 13) && (y == 1 || y == 11 )){
+                    sprites.woodSprite.draw('wood', context,x * 32, y* 32)
+                    let woodTile = new Tile({x:x * 32, y: y* 32}, 'wood', game)
                     tiles.push(woodTile)  
-                    woodArray.push(woodTile)              
+                    woodArray.push(woodTile)  
+                }
+                if(( (y == 7 || y == 5) && !(x == 3 || x == 13) )){
+                    sprites.woodSprite.draw('wood', context,x * 32, y* 32)
+                    let woodTile = new Tile({x:x * 32, y: y* 32}, 'wood', game)
+                    tiles.push(woodTile)  
+                    woodArray.push(woodTile)  
+                }
+                if(( x == 3 || x == 13 )){
+                    sprites.woodSprite.draw('wood', context,x * 32, y* 32)
+                    let woodTile = new Tile({x:x * 32, y: y* 32}, 'wood', game)
+                    tiles.push(woodTile)  
+                    woodArray.push(woodTile)  
                 }
             }
         }
     }
-    // drawBonuses(context, sprites, woodArray, game)
+    drawBonuses(context, sprites, woodArray, game)
 }
 
 

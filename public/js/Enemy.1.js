@@ -2,28 +2,29 @@ import { loadGhostSprite, loadDeadSprite } from './sprites.js';
 import { createSpriteLayer } from './layers.js';
 
 export default function createEnemy(pos, type, game){
-    if(type == 'dead'){
-        return loadDeadSprite().then(deadSprite => {
-            const dead = new Enemy(pos, type, deadSprite, game)
-            game.enemies.push(dead)
-            return dead
-        })
-    } else if(type == 'ghost'){
+    if(type === 'ghost'){
         return loadGhostSprite().then(ghostSprite => {
-            const ghost = new Enemy(pos, type, ghostSprite, game)
+            const ghost = new Enemy(pos, ghostSprite,type, game)
             game.enemies.push(ghost)
             return ghost
+        })
+    } else if (type === 'dead'){
+        return loadDeadSprite().then(deadSprite => {
+            const dead = new Enemy(pos, deadSprite, type, game)
+            game.enemies.push(dead)
+            return dead
         })
     }
 }
 
 
 class Enemy{
-    constructor(pos, type, ghostSprite, game, spriteLayer){
+    constructor(pos, ghostSprite, type, game, spriteLayer){
         this.pos = pos
+        this.type = type
         this.direction = {x: 1, y: 0}
         this.lastDirection = {x: -1, y: 0}
-        this.type = type
+        this.type = ''
         this.excludeDirections = []
         this.sprite = ghostSprite;
         this.game = game ;
@@ -31,35 +32,26 @@ class Enemy{
         this.dirY = -1
         this.previousPosition = {}
         this.targetPosition = {}
-        if(type == 'ghost'){
-            this.vel = .5
-        } else {
-            this.vel = .8
-        }
+        this.vel = .5
         this.spriteLayer = spriteLayer
         this.size = {
-            w: 32, 
-            h: 32
+            w: 24, 
+            h: 24
         }
         this.spriteLayer = createSpriteLayer(this);
         this.game.layers.push(this.spriteLayer)
         this.frameIndex = 1;
         this.currentFrameCount = 0
         this.changeRoute = false
-        this.currentAxisCount = 0;
-        this.currentFrameIndex = 1
-        this.animationStartPosition = {...this.pos}
-        this.changeAxis = false
-        this.playerDirection = {}
     }
 
     draw(context){
-        let frameName = this.type == 'ghost' ? this.getBallonFrameName() : this.getDeadFrameName() 
-        this.sprite.draw(frameName, this.game.context, this.pos.x, this.pos.y);
+        this.sprite.draw(this.getFrameName(), context, this.pos.x, this.pos.y);
     }
 
+    
     getBallonFrameName(){
-        console.log('ballon')
+
         if(this.currentFrameCount < 75){
             this.currentFrameCount++;
             return `ballon-${this.frameIndex}`
@@ -75,88 +67,21 @@ class Enemy{
         }
     }
 
-    getDeadFrameName(){
-        if(this.direction.x == 1 && this.direction.y == 0){
-            this.calculateNextFrame()
-            return `dead-right-${Math.ceil(this.currentFrameIndex)}`
-        } else if(this.direction.x == -1 && this.direction.y == 0){
-            this.calculateNextFrame()
-            return `dead-left-${Math.ceil(this.currentFrameIndex)}`
-
-        } else if(this.direction.x == 0 && this.direction.y == 1){
-            this.calculateNextFrame()
-            return `dead-down-${Math.ceil(this.currentFrameIndex)}`
-
-        } else if(this.direction.x == 0 && this.direction.y == -1){
-            this.calculateNextFrame()
-            return `dead-top-${Math.ceil(this.currentFrameIndex)}`
-        } 
-    }
-
-    calculateNextFrame(){
-        if(this.direction.x){
-             let index = Math.round(Math.random() * 3) // Math.abs(this.pos.x - this.animationStartPosition.x ) % 4
-             this.currentFrameIndex = index < 1 ? 1 : index
-        } else{
-            let index = Math.round(Math.random() * 3) // Math.abs(this.pos.y - this.animationStartPosition.y ) % 3
-            this.currentFrameIndex = index < 1 ? 1 : index
-        }
-    }
-
-    setPlayerDirection(){
-        let distance = {x: this.pos.x - this.game.player.pos.x, y: this.pos.y - this.game.player.pos.y}
-        this.playerDirection.x = distance.x < 1 ? 1 : -1
-        this.playerDirection.y = distance.y < 1 ? 1 : -1
-    }
-
-    getToPlayer(){
-        let availableDirections = this.availableDirections()
-        if(this.direction.x != 0){
-            // change to Y
-            for(let i = 0; i < availableDirections.length; i++){
-                if(availableDirections[i].y === this.playerDirection.y){
-                    // debugger
-                    this.lastDirection = {...this.direction}
-                    this.direction = {...availableDirections[i]}
-                    this.changeAxis = false;
-                }
-            }
-        } else {
-            // Change to X
-            for(let i = 0; i < availableDirections.length; i++){
-                if(availableDirections[i].x === this.playerDirection.x){
-                    // debugger
-                    this.lastDirection = {...this.direction}
-                    this.direction = {...availableDirections[i]}
-                    this.changeAxis = false;
-                }
-            }
-        }
-    }
     
+
     update() {
-        this.setPlayerDirection();
         this.detectPlayerCollision()
         if(this.detectWallCollision(this.direction)){
             this.lastDirection = {x: this.direction.x * -1, y: this.direction.y * -1}
             let nextDIrection = this.findNextDirection()
             this.direction = nextDIrection;
-            if(!(this.direction.x == this.playerDirection.x || this.direction.y == this.playerDirection.y)){
-                // debugger
-                this.changeAxis = true;
-            }
-            this.animationStartPosition = {...this.pos}
             this.pos.x = this.myTileCorner().x
             this.pos.y = this.myTileCorner().y
         } else if(this.detectBombCollision()){
             // debugger
-            // debugger
             this.lastDirection = {...this.direction}
             this.direction = {x: this.direction.x * -1, y: this.direction.y * -1}
-            this.animationStartPosition = {...this.pos}
-        }  else if(this.changeAxis){
-            this.getToPlayer()
-        }
+        } 
         this.pos.x = this.pos.x + this.direction.x * this.vel
         this.pos.y = this.pos.y + this.direction.y * this.vel
     }
@@ -191,11 +116,12 @@ class Enemy{
 
    findNextDirection(){
        let availableDirs = this.availableDirections()
-        // console.log(availableDirs)
+        console.log(availableDirs)
         if(availableDirs.length === 1){
             return availableDirs[0]
         } else {
             availableDirs = availableDirs.filter(dir => {
+                // debugger
                 return !(dir.x == this.lastDirection.x && dir.y == this.lastDirection.y)
             })
             return availableDirs[Math.floor(Math.random()*availableDirs.length)];
@@ -216,11 +142,10 @@ class Enemy{
 
     detectBombCollision(){
         let bombBox = {};
-        for(let i = 0; i < this.game.player.bombs.length ; i++){
-            // debugger
-            bombBox = {... this.game.player.bombs[i].pos}
-            bombBox.height =  this.game.player.bombs[i].size.h
-            bombBox.width =  this.game.player.bombs[i].size.w
+        for(let i = 0; i < this.game.bombs.length ; i++){
+            bombBox = {...this.game.bombs[i].pos}
+            bombBox.height = this.game.bombs[i].size.h
+            bombBox.width = this.game.bombs[i].size.w
         }
         var ballonBox = {...this.pos};
         ballonBox.width = this.size.w

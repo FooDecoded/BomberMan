@@ -15,15 +15,30 @@ class Game {
         this.bombs = [];
         this.bonuses = [];
         this.enemies = [];
-        // this.players = []
+        this.bonusesPercent = 75
         this.player = null
         this.updateBackground = false
         this.loadGame()
         this.update = this.update.bind(this)
+        this.isPlaying = true
+        this.gameStarted = true
     }
     
     createEnimies() {
-        createEnemy({x: 32, y: 32}, this).then( (enemy) => {
+        createEnemy({x: 32 * 15, y: 32}, 'ghost', this).then( (enemy) => {
+            this.enemies.push(enemy)
+        } )
+        createEnemy({x: 32, y: 32 * 11},'ghost', this).then( (enemy) => {
+            this.enemies.push(enemy)
+        } )
+
+        createEnemy({x: 32 * 15, y: 32 * 11},'ghost', this).then( (enemy) => {
+            this.enemies.push(enemy)
+        } )
+        createEnemy({x: 32 * 11, y: 32 * 3}, 'dead', this).then( (enemy) => {
+            this.enemies.push(enemy)
+        } )
+        createEnemy({x: 32 * 11, y: 32 * 9}, 'dead', this).then( (enemy) => {
             this.enemies.push(enemy)
         } )
     }
@@ -67,6 +82,7 @@ class Game {
             space: false
         }
         window.addEventListener('keydown', (e) => {
+            e.preventDefault()
             if(e.keyCode === UP){
                 this.player.moving = true
                 this.player.direction = {x: 0, y:-1}
@@ -104,13 +120,27 @@ class Game {
         })
     }
 
-    update(){
-        this.bombs.forEach(bomb => bomb.update())
-        this.enemies.forEach(enemy => enemy.update())
-        this.player.update()
-        this.comp.draw(this.context);
+    // createMenuLayer
 
+    showMenu(){
+        // this.context
+    }
+
+    update(){
+        if(this.isPlaying){
+            this.bombs.forEach(bomb => bomb.update())
+            this.enemies.forEach(enemy => enemy.update())
+            this.player.update()
+            this.comp.draw(this.context);
+        }
+        else {
+            this.comp.draw(this.context)
+        }
         requestAnimationFrame(this.update);
+    }
+
+    showMenu(){
+
     }
 
     loadGame(){
@@ -145,9 +175,5 @@ class Game {
 
 new Game();
 
-
-// const canvas = document.getElementById('screen');
-// const context = canvas.getContext('2d');
-// let tiles = []
 
 

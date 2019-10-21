@@ -33,16 +33,20 @@ export default class Fire {
     }
 
     killCollidableObjects(){
-        // console.log('coll')
+        let fireBox = {x: this.pos.x, y: this.pos.y, width: 32, height: 32}
         this.game.enemies.forEach(enemy => {
-            // console.log(enemy)
             if(this.intersectRect(
-                {x: this.pos.x, y: this.pos.y, width: 32, height: 32}, 
+                fireBox, 
                 {x: enemy.pos.x, y: enemy.pos.y, height: enemy.size.h, width: enemy.size.w})){
-                    // console.log('killlled')
                     enemy.remove();
             }
         });
+        let playerBox = {...this.game.player.pos}
+        playerBox.width = this.game.player.size.w
+        playerBox.height = this.game.player.size.h
+        if(this.intersectRect(fireBox, playerBox)){
+            this.game.player.kill()
+        }
     }
 
     remove(){

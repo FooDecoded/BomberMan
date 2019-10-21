@@ -8,7 +8,6 @@ class Player extends Entity {
         super();
 
         this.game = game
-        // debugger
         this.bombSprite = sprites.bombSprite
         this.sprite = sprites.playerSprite;
         this.fireSprite = sprites.fireSprite
@@ -25,6 +24,7 @@ class Player extends Entity {
         this.moving = false
         this.currentFrameIndex = 1
         this.animationStartPosition = {...this.pos}
+        this.lives = 3
     }
 
     getFrameName(){
@@ -53,6 +53,10 @@ class Player extends Entity {
         } else{
             this.currentFrameIndex = Math.abs(this.pos.y - this.animationStartPosition.y ) % 3
         }
+    }
+
+    kill(){
+        console.log('I got killed')
     }
 
     draw(context) {
