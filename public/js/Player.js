@@ -135,7 +135,7 @@ class Player extends Entity {
         return availableSpaces
        }
 
-       moveUp = function(){
+     moveUp (){
         if(this.detectWallCollision({x: 0, y: -1})) {
             return} ;
         if(!this.animationStartPosition){

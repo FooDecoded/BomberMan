@@ -9,6 +9,8 @@ import { loadGhostSprite, loadDeadSprite } from './sprites.js';
 import { loadImage } from './loaders.js'
 
 
+console.log('gammmmme');    
+
 class Game {
     constructor(){
         this.canvas = document.getElementById('screen');
@@ -244,8 +246,8 @@ class Game {
             loadBackgroundSprites(),
             loadGhostSprite(), 
             loadDeadSprite(),
-            loadImage('/img/pause.png'),
-            loadImage('/img/game-over.png')
+            loadImage('./public/img/pause.png'),
+            loadImage('./public/img/game-over.png')
         ])
         .then(([player, backgroundSprites, ghostSprite, deadSprite, pauseImg, gameOverImg]) => {
             // debugger
