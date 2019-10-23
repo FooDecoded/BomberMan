@@ -35,9 +35,9 @@ class Game {
     createEnimies() {
         Levels[this.level].enemies.forEach((enemy) => {
             if(enemy.type == 'ghost'){
-                this.enemies.push(new Enemy(enemy.pos, enemy.type, this.ghostSprite, this ,Levels[this.level].enemiesSpeed))
+                this.enemies.push(new Enemy({...enemy.pos}, enemy.type, this.ghostSprite, this ,Levels[this.level].enemiesSpeed))
             } else if(enemy.type == 'dead'){
-                this.enemies.push(new Enemy(enemy.pos, enemy.type, this.deadSprite, this, Levels[this.level].enemiesSpeed))
+                this.enemies.push(new Enemy({...enemy.pos}, enemy.type, this.deadSprite, this, Levels[this.level].enemiesSpeed))
             }
             
         })
@@ -125,7 +125,8 @@ class Game {
                 if(this.gameOver){
                     // debugger
                     this.level = 1
-                    this.loadGame()
+                    // this.loadGame()
+                    this.setUpLevel()
                 } else {
                     this.toggleMenu()
                 }
@@ -174,10 +175,13 @@ class Game {
     update(){
 
         if(this.isPlaying){
-            if(!this.player.lives <= 0){
-                if(this.enemies.length == 0){
+            if(!this.player.lives <= 0 && !this.gameOver){
+                if(this.enemies.length == 0 && !this.gameOver){
                     this.handleLevelChange()
                 }
+                // debugger
+                // console.log('innnnnnnnnnnnnnnn')
+                // debugger
                 this.bombs.forEach(bomb => bomb.update())
                 this.enemies.forEach(enemy => enemy.update())
                 this.player.update()
@@ -214,12 +218,22 @@ class Game {
         this.tiles = []
         this.enemies = []
         this.level > 1 && this.layers.shift()
+        // debugger
+        if(this.gameOver){
+            this.comp.layers = []
+            this.layers = this.comp.layers ;
+            this.layers.push(this.playerSpriteLayer)
+            this.gameOver = false;
+            this.isPlaying = true;
+            this.player.lives = 3;
+        }
         this.layers.unshift(createBackgroundLayer(this.backgroundSprites, this.tiles, this));
-
+        // debugger
         this.createEnimies()
         if(!this.gameOver && !this.alreadyLoaded){
             this.update()
             this.alreadyLoaded = true 
+            this.isPlaying = false
         }
     }
 
@@ -246,8 +260,8 @@ class Game {
             !this.alreadyLoaded && this.setupKeys()        
             this.comp = new Compositor();
             this.layers = this.comp.layers;
-            const spriteLayer = createSpriteLayer(player);
-            this.layers.push(spriteLayer);
+            this.playerSpriteLayer = createSpriteLayer(player);
+            this.layers.push(this.playerSpriteLayer);
             this.player = player;
             this.backgroundSprites = backgroundSprites;
             this.setUpLevel()
