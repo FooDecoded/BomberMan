@@ -60,6 +60,9 @@ class Player extends Entity {
         this.lives -= 1;
         if(this.lives > 0 ){
             this.resurrect()
+        } else {
+            this.game.gameOver = true
+            this.game.isPlaying = false
         }
     }
 

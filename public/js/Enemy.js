@@ -2,7 +2,8 @@ import { createSpriteLayer } from './layers.js';
 
 
 export default class Enemy{
-    constructor(pos, type, ghostSprite, game, spriteLayer){
+    constructor(pos, type, ghostSprite, game, vel){
+        // debugger
         this.pos = pos
         this.direction = {x: 1, y: 0}
         this.lastDirection = {x: -1, y: 0}
@@ -15,11 +16,12 @@ export default class Enemy{
         this.previousPosition = {}
         this.targetPosition = {}
         if(type == 'ghost'){
-            this.vel = .5
+            // debugger
+            this.vel = .5 * vel
         } else {
-            this.vel = .8
+            this.vel = .8 * vel
         }
-        this.spriteLayer = spriteLayer
+        // this.spriteLayer = spriteLayer
         this.size = {
             w: 32, 
             h: 32

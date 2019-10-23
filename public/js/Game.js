@@ -26,14 +26,18 @@ class Game {
         this.isPlaying = false
         this.gameStarted = true
         this.level = 1
+        this.gameOver = false
+        this.alreadyLoaded = false
     }
+
+
     
     createEnimies() {
         Levels[this.level].enemies.forEach((enemy) => {
             if(enemy.type == 'ghost'){
-                this.enemies.push(new Enemy(enemy.pos, enemy.type, this.ghostSprite, this))
+                this.enemies.push(new Enemy(enemy.pos, enemy.type, this.ghostSprite, this ,Levels[this.level].enemiesSpeed))
             } else if(enemy.type == 'dead'){
-                this.enemies.push(new Enemy(enemy.pos, enemy.type, this.deadSprite, this))
+                this.enemies.push(new Enemy(enemy.pos, enemy.type, this.deadSprite, this, Levels[this.level].enemiesSpeed))
             }
             
         })
@@ -78,49 +82,60 @@ class Game {
             space: false
         }
         window.addEventListener('keydown', (e) => {
-            e.preventDefault()
-            if(e.keyCode === UP){
-                this.player.moving = true
-                this.player.direction = {x: 0, y:-1}
-            } else if(e.keyCode === DOWN){
-                this.player.moving = true
-                this.player.direction = {x: 0, y:1}
-
-            } else if (e.keyCode === RIGHT){
-                this.player.moving = true
-                this.player.direction = {x: 1, y:0}
-
-            } else if(e.keyCode === LEFT) {
-                this.player.moving = true
-                this.player.direction = {x: -1, y:0}
-            } else if(e.keyCode === SPACE) {
-                this.player.setBombsListener();
-                this.player.update()
-            } 
+            if(this.isPlaying){
+                e.preventDefault()
+                if(e.keyCode === UP){
+                    this.player.moving = true
+                    this.player.direction = {x: 0, y:-1}
+                } else if(e.keyCode === DOWN){
+                    this.player.moving = true
+                    this.player.direction = {x: 0, y:1}
+    
+                } else if (e.keyCode === RIGHT){
+                    this.player.moving = true
+                    this.player.direction = {x: 1, y:0}
+    
+                } else if(e.keyCode === LEFT) {
+                    this.player.moving = true
+                    this.player.direction = {x: -1, y:0}
+                } else if(e.keyCode === SPACE) {
+                    this.player.setBombsListener();
+                    this.player.update()
+                } 
+            }
         })
 
-        // window.addEventListener()
-
         window.addEventListener('keyup', (e) => {
-            if(e.keyCode === UP){
-                keyboardMap.up = false
-                this.player.stop()
-            } else if(e.keyCode === DOWN){
-                keyboardMap.down = false
-                this.player.stop()
-            } else if (e.keyCode === RIGHT){
-                keyboardMap.right = false
-                this.player.stop()
-            } else if(e.keyCode === LEFT) {
-                keyboardMap.left = false
-                this.player.stop()
-            } else if(e.keyCode === ESC){
-                this.toggleMenu()
+            if(this.isPlaying){
+                if(e.keyCode === UP){
+                    keyboardMap.up = false
+                    this.player.stop()
+                } else if(e.keyCode === DOWN){
+                    keyboardMap.down = false
+                    this.player.stop()
+                } else if (e.keyCode === RIGHT){
+                    keyboardMap.right = false
+                    this.player.stop()
+                } else if(e.keyCode === LEFT) {
+                    keyboardMap.left = false
+                    this.player.stop()
+                } 
+            }
+            if(e.keyCode === ESC){
+                if(this.gameOver){
+                    // debugger
+                    this.level = 1
+                    this.loadGame()
+                } else {
+                    this.toggleMenu()
+                }
             }
         })
     }
 
-    // createMenuLayer
+    emptyScreen(){
+        this.layers = []
+    }
 
     toggleMenu(){
         if(this.isPlaying){
@@ -132,11 +147,16 @@ class Game {
 
     drawMenu(){ 
         this.context.drawImage(this.pauseImg, 240, 170)
+        this.context.font = "bold 30px Georgia";
+        this.context.fillStyle = 'black';
+        this.context.fillText(`Hit 'ESC' to continue`, 130, 200 + 60);
     }
 
     drawGameOver(){
-        this.context.font = "30px Arial";
-        this.context.fillText(`You lost!!!! Game Over`, 200, 200);
+        this.context.drawImage(this.gameOverImg, 200, 150);
+        this.context.font = "bold 30px Georgia";
+        this.context.fillStyle = 'black';
+        this.context.fillText(`Hit 'ESC' to try again!`, 130, 200 + 95);
     }
 
     handleLevelChange(){
@@ -145,15 +165,17 @@ class Game {
     }
 
     drawGameInfo(){
-        this.context.font = "20px Arial";
+        // this.context.fillStyle = "#E5AA2B"
+        this.context.font = "bold 20px Georgia";
+        this.context.fillStyle = '#CAC7C2';
         this.context.fillText(`Level: ${this.level}  Hearts: ${this.player.lives}`, 200, 20);
     }
 
     update(){
+
         if(this.isPlaying){
             if(!this.player.lives <= 0){
                 if(this.enemies.length == 0){
-                    // debugger
                     this.handleLevelChange()
                 }
                 this.bombs.forEach(bomb => bomb.update())
@@ -166,9 +188,11 @@ class Game {
                 this.drawGameOver()
             }
         }
-        else {
+        else if(!this.isPlaying && !this.gameOver) {
             this.comp.draw(this.context)
             this.drawMenu()
+        } else if (this.gameOver && !this.isPlaying){
+            this.drawGameOver()
         }
         requestAnimationFrame(this.update);
     }
@@ -188,11 +212,15 @@ class Game {
         this.bonuses = []
         this.bombs = []
         this.tiles = []
+        this.enemies = []
         this.level > 1 && this.layers.shift()
         this.layers.unshift(createBackgroundLayer(this.backgroundSprites, this.tiles, this));
 
         this.createEnimies()
-        this.update()
+        if(!this.gameOver && !this.alreadyLoaded){
+            this.update()
+            this.alreadyLoaded = true 
+        }
     }
 
 
@@ -202,13 +230,20 @@ class Game {
             loadBackgroundSprites(),
             loadGhostSprite(), 
             loadDeadSprite(),
-            loadImage('/img/pause.png')
+            loadImage('/img/pause.png'),
+            loadImage('/img/game-over.png')
         ])
-        .then(([player, backgroundSprites, ghostSprite, deadSprite, pauseImg]) => {
+        .then(([player, backgroundSprites, ghostSprite, deadSprite, pauseImg, gameOverImg]) => {
+            // debugger
             this.pauseImg = pauseImg;
             this.ghostSprite = ghostSprite;
             this.deadSprite = deadSprite;
-            this.setupKeys()        
+            this.gameOverImg = gameOverImg
+            this.enemies = []
+            this.bombs = []
+            this.gameOver = false
+            this.isPlaying = true;
+            !this.alreadyLoaded && this.setupKeys()        
             this.comp = new Compositor();
             this.layers = this.comp.layers;
             const spriteLayer = createSpriteLayer(player);
