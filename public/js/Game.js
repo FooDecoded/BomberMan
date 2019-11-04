@@ -3,7 +3,6 @@ import {loadBackgroundSprites} from './sprites.js';
 import {createBackgroundLayer, createSpriteLayer} from './layers.js';
 import createPlayer from './Player.js'
 import Enemy from './Enemy.js'
-import Controller from './Controller.js'
 import Levels from './Levels.js'
 import { loadGhostSprite, loadDeadSprite } from './sprites.js';
 import { loadImage } from './loaders.js'
@@ -23,13 +22,15 @@ class Game {
         this.bonusesPercent = 75
         this.player = null
         this.updateBackground = false
-        this.loadGame()
         this.update = this.update.bind(this)
         this.isPlaying = false
         this.gameStarted = true
         this.level = 1
         this.gameOver = false
         this.alreadyLoaded = false
+        this.loadingNextLevel = false
+        this.loadGame()
+        
     }
 
 
@@ -155,6 +156,8 @@ class Game {
         this.context.fillText(`Hit 'ESC' to continue`, 130, 200 + 60);
     }
 
+
+
     drawGameOver(){
         this.context.drawImage(this.gameOverImg, 200, 150);
         this.context.font = "bold 30px Georgia";
@@ -163,35 +166,45 @@ class Game {
     }
 
     handleLevelChange(){
-        this.level += 1
-        this.setUpLevel()
+        this.drawLoadingNextLevel()
+        setTimeout(() => {
+            this.level += 1
+            this.setUpLevel()
+            this.loadingNextLevel = false
+        }, 1500)
     }
 
     drawGameInfo(){
-        // this.context.fillStyle = "#E5AA2B"
-        this.context.font = "bold 20px Georgia";
+        this.context.font = "bold 30px Georgia";
         this.context.fillStyle = '#CAC7C2';
-        this.context.fillText(`Level: ${this.level}  Hearts: ${this.player.lives}`, 200, 20);
+        this.context.fillText(`Level: ${this.level}  Hearts: ${this.player.lives}`, 170, 25);
+    }
+
+    drawLoadingNextLevel(){ 
+        this.context.font = "bold 30px Georgia";
+        this.context.fillStyle = 'black';
+        this.context.fillText(`Great Job! Now Level`, 120 , 200);
+        this.context.fillStyle = 'seagreen';
+        this.context.fillText(`${this.level + 1}`, 410, 200)
     }
 
     update(){
 
         if(this.isPlaying){
-            if(!this.player.lives <= 0 && !this.gameOver){
-                if(this.enemies.length == 0 && !this.gameOver){
-                    this.handleLevelChange()
+            if(!this.loadingNextLevel){
+                if(!this.player.lives <= 0 && !this.gameOver ){
+                    if(this.enemies.length == 0 && !this.gameOver){
+                        this.loadingNextLevel = true
+                        this.handleLevelChange()
+                    }
+                    this.bombs.forEach(bomb => bomb.update())
+                    this.enemies.forEach(enemy => enemy.update())
+                    this.player.update()
+                    this.comp.draw(this.context);
+                    this.drawGameInfo()
                 }
-                // debugger
-                // console.log('innnnnnnnnnnnnnnn')
-                // debugger
-                this.bombs.forEach(bomb => bomb.update())
-                this.enemies.forEach(enemy => enemy.update())
-                this.player.update()
-                this.comp.draw(this.context);
-                this.drawGameInfo()
             } else {
-                this.comp.draw(this.context);
-                this.drawGameOver()
+                this.drawLoadingNextLevel()
             }
         }
         else if(!this.isPlaying && !this.gameOver) {
@@ -199,7 +212,7 @@ class Game {
             this.drawMenu()
         } else if (this.gameOver && !this.isPlaying){
             this.drawGameOver()
-        }
+        } 
         requestAnimationFrame(this.update);
     }
 
@@ -220,7 +233,6 @@ class Game {
         this.tiles = []
         this.enemies = []
         this.level > 1 && this.layers.shift()
-        // debugger
         if(this.gameOver){
             this.comp.layers = []
             this.layers = this.comp.layers ;
@@ -230,7 +242,6 @@ class Game {
             this.player.lives = 3;
         }
         this.layers.unshift(createBackgroundLayer(this.backgroundSprites, this.tiles, this));
-        // debugger
         this.createEnimies()
         if(!this.gameOver && !this.alreadyLoaded){
             this.update()
@@ -250,7 +261,6 @@ class Game {
             loadImage('./public/img/game-over.png')
         ])
         .then(([player, backgroundSprites, ghostSprite, deadSprite, pauseImg, gameOverImg]) => {
-            // debugger
             this.pauseImg = pauseImg;
             this.ghostSprite = ghostSprite;
             this.deadSprite = deadSprite;
